@@ -145,8 +145,7 @@
                 
                 // Apply user-directed force.
                 var f = new b2Vec2(keyAxis[0]*wBall.GetMass()*0.25, keyAxis[1]*wBall.GetMass()*0.25);
-                wBall.ApplyImpulse(f, wBall.GetPosition());          
-                keyAxis = [0,0];
+                wBall.ApplyImpulse(f, wBall.GetPosition());
 
                 // Take a time step.
                 wWorld.Step(1/60, 8, 3);
@@ -293,8 +292,21 @@
 
                 // Bind keyboard and resize events.
                 KeyboardJS.bind.axis('left', 'right', 'down', 'up', onMoveKey);
-                KeyboardJS.bind.axis('h', 'l', 'j', 'k', onMoveKey);
                 $(window).resize(onResize);
+                                
+                var mouseMove = function(event){
+                    if (event.pageX > window.innerWidth * .9){
+                        keyAxis = [1,0];
+                    }
+                    else if (event.pageX < window.innerWidth * .1){
+                        keyAxis = [-1,0];
+                    }
+                    else{
+                        keyAxis = [0,0];
+                    }
+                };
+               
+                $(window).mousemove(mouseMove);
                 
 
                 // Set the initial game state.
@@ -302,9 +314,8 @@
                 
                 // Start the game loop.
                 requestAnimationFrame(gameLoop);
-
             })
-            
+           
             
 
         </script>

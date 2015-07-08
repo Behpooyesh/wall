@@ -347,48 +347,50 @@
 		}
 
 		//up
-		var clearUp = bindKey(up, function () {
+		var clearRight = bindKey(up, function () {
 			if(axis[0] === 0) {
 				axis[0] = -1;
 			}
 		}, function() {
 			axis[0] = 0;
+			callback(axis);
 		}).clear;
 
 		//down
-		var clearDown = bindKey(down, function () {
+		var clearLeft = bindKey(down, function () {
 			if(axis[0] === 0) {
 				axis[0] = 1;
 			}
 		}, function() {
 			axis[0] = 0;
+			callback(axis);
 		}).clear;
 
 		//left
-		var clearLeft = bindKey(left, function () {
-			if(axis[1] === 0) {
-				axis[1] = -1;
-			}
+		var clearDown = bindKey(left, function () {
+			//if(axis[1] === 0) {
+			//	axis[1] = -1;
+			//}
 		}, function() {
 			axis[1] = 0;
 		}).clear;
 
 		//right
-		var clearRight = bindKey(right, function () {
-			if(axis[1] === 0) {
-				axis[1] = 1;
-			}
+		var clearUp = bindKey(right, function () {
+			//if(axis[1] === 0) {
+			//	axis[1] = 1;
+			//}
 		}, function() {
 			axis[1] = 0;
 		}).clear;
-
+		
 		var timer = setInterval(function(){
 
 			//NO CHANGE
 			if(axis[0] === 0 && axis[1] === 0) {
 				return;
 			}
-
+//			console.log("in timer : axis[0] =  " + axis[0]);
 			//run the callback
 			callback(axis);
 
