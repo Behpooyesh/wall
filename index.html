@@ -7,6 +7,9 @@
         <script src="keyboard.js"></script>
         <script src="jquery.js"></script>
         <script src="maze.js"></script>
+            
+		<script src="helvetiker_bold.typeface.js"></script>
+		<script src="helvetiker_regular.typeface.js"></script>
 
         <script>
 
@@ -18,7 +21,7 @@
                 mouseY         = undefined,
                 maze           = undefined, 
                 mazeMesh       = undefined,
-                mazeDimension  = 11,
+                mazeDimension  = 20,
                 planeMesh      = undefined,
                 ballMesh       = undefined,
                 ballRadius     = 0.25,
@@ -59,19 +62,19 @@
                 fixDef.shape = new b2CircleShape(ballRadius);
                 wBall.CreateFixture(fixDef);
 
-                // Create the maze.
+                //create blocks at begin and end of the wall to avoid endless scrolling
                 bodyDef.type = b2Body.b2_staticBody;
                 fixDef.shape = new b2PolygonShape();
                 fixDef.shape.SetAsBox(0.5, 0.5);
-//                for (var i = 0; i < maze.dimension; i++) {
-//                    for (var j = 0; j < maze.dimension; j++) {
-//                        if (maze[i][j]) {
-//                            bodyDef.position.x = i;
-//                            bodyDef.position.y = j;
-//                            wWorld.CreateBody(bodyDef).CreateFixture(fixDef);
-//                        }
-//                    }
-//                }
+                for (var j = 0; j < 5; j++) {
+                    bodyDef.position.x = 0;
+                    bodyDef.position.y = j;
+                    wWorld.CreateBody(bodyDef).CreateFixture(fixDef);
+                    //TODO: 10 is experimental for now
+                    bodyDef.position.x = mazeDimension - 10;
+                    bodyDef.position.y = j;
+                    wWorld.CreateBody(bodyDef).CreateFixture(fixDef);
+                }
             }
             
             
@@ -79,15 +82,12 @@
                 var dummy = new THREE.Geometry();
                 for (var i = 0; i < field.dimension; i++) {
                     for (var j = 0; j < 5; j++) {
-                      //  if (field[i][j]) {
-                            var geometry = new THREE.CubeGeometry(1,1,1,1,1,1);
-                            var mesh_ij = new THREE.Mesh(geometry);
-                            mesh_ij.position.x = i;
-                            mesh_ij.position.y = j;
-                            mesh_ij.position.z = 0;
-                            THREE.GeometryUtils.merge(dummy, mesh_ij);
-                            
-                        //}
+                        var geometry = new THREE.CubeGeometry(1,1,1,1,1,1);
+                        var mesh_ij = new THREE.Mesh(geometry);
+                        mesh_ij.position.x = i;
+                        mesh_ij.position.y = j;
+                        mesh_ij.position.z = 0;
+                        THREE.GeometryUtils.merge(dummy, mesh_ij);
                     }
                 }
                 var material = new THREE.MeshPhongMaterial({map: brickTexture});
@@ -122,6 +122,39 @@
                 // Add the maze.
                 mazeMesh = generate_maze_mesh(maze);
                 scene.add(mazeMesh);
+                
+                
+                
+                //Add Text
+//                var materialFront = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+//            	var materialSide = new THREE.MeshBasicMaterial( { color: 0x000088 } );
+//            	var materialArray = [ materialFront, materialSide ];
+//                console.log("1");
+//            	var textGeom = new THREE.TextGeometry( "text", {
+//
+//					size: 1,
+//					height: 1,
+//					curveSegments: 1,
+//
+//					font: "helvetiker",
+//
+//
+//				});
+//                console.log("2");
+//            	// font: helvetiker, gentilis, droid sans, droid serif, optimer
+//            	// weight: normal, bold
+//            	
+//            	var textMaterial = new THREE.MeshFaceMaterial(materialArray);
+//            	var textMesh = new THREE.Mesh(textGeom, textMaterial );
+//            	
+//            	textGeom.computeBoundingBox();
+//            	var textWidth = textGeom.boundingBox.max.x - textGeom.boundingBox.min.x;
+//            	
+//            	textMesh.position.set( -0.5 * textWidth, 50, 100 );
+//            	textMesh.rotation.x = -Math.PI / 4;
+//                console.log("3");
+//            	scene.add(textMesh);
+//                console.log("4");
 
                 // Add the ground.
                 g = new THREE.PlaneGeometry(mazeDimension*10, mazeDimension*10, mazeDimension, mazeDimension);
@@ -132,7 +165,7 @@
                 planeMesh.position.set((mazeDimension-1)/2, (mazeDimension-1)/2, 0);
                 planeMesh.rotation.set(Math.PI/2, 0, 0);
                 scene.add(planeMesh);                
-
+console.log("5");
             }
 
 
@@ -172,7 +205,7 @@
                 ballMesh.rotation.getRotationFromMatrix(ballMesh.matrix);
                 
                 // Update camera and light positions.
-                camera.position.x = ballMesh.position.x + 1;//+= (ballMesh.position.x - camera.position.x) * 0.5;
+                camera.position.x = ballMesh.position.x + 5;//+= (ballMesh.position.x - camera.position.x) * 0.5;
                 camera.position.y = ballMesh.position.y + 1;// += (ballMesh.position.y - camera.position.y) * 0.5;
                 //camera.position.z += (5 - camera.position.z);
                 light.position.x = camera.position.x;
@@ -198,41 +231,13 @@
                         gameState = 'play';
                         break;
                         
-//                    case 'fade in':
-//                        light.intensity += 0.1 * (1.0 - light.intensity);
-//                        renderer.render(scene, camera);
-//                        if (Math.abs(light.intensity - 1.0) < 0.05) {
-//                            light.intensity = 1.0;
-//                            gameState = 'play';
-//                        }
-//                        break;
-
                     case 'play':
                         updatePhysicsWorld();
                         updateRenderWorld();
                         renderer.render(scene, camera);
 
-                        // Check for victory.
-                        //var mazeX = Math.floor(ballMesh.position.x + 0.5);
-                        //var mazeY = Math.floor(ballMesh.position.y + 0.5);
-                        //if (mazeX == mazeDimension && mazeY == mazeDimension - 2) { 
-                        //    mazeDimension += 2;
-                        //    gameState = 'initialize';
-                        //}
                         break;
-                
-//                    case 'fade out':
-//                        updatePhysicsWorld();
-//                        updateRenderWorld();
-//                        light.intensity += 0.1 * (0.0 - light.intensity);
-//                        renderer.render(scene, camera);
-//                        if (Math.abs(light.intensity - 0.0) < 0.1) {
-//                            light.intensity = 0.0;
-//                            renderer.render(scene, camera);
-//                            gameState = 'initialize';
-//                        }
-//                        break;
-                        
+                                        
                 }
             
                 requestAnimationFrame(gameLoop);
